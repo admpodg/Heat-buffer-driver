@@ -27,7 +27,7 @@ void loop(void)
 {
   // call sensors.requestTemperatures() to issue a global temperature
   // request to all devices on the bus
-  uint8_t kurwen_adres[8];
+  uint8_t DS18B20_address[8];
    
   
   sensors.requestTemperatures(); // Send the command to get temperatures
@@ -38,11 +38,11 @@ for (int i =0; i < sensors.getDS18Count(); i++){
   Serial.print(" ");
   Serial.print(sensors.getTempCByIndex(i)); // Why "byIndex"? 
   Serial.print(", ");
-  sensors.getAddress(kurwen_adres, i);
+  sensors.getAddress(DS18B20_address, i);
   Serial.print("adress: ");
 
   for(int z = 0; z<8; z++) {Serial.print("0x");
-  Serial.print(kurwen_adres[z], HEX);
+  Serial.print(DS18B20_address[z], HEX);
   Serial.print(" ");
   }
   
