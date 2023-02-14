@@ -24,6 +24,7 @@ DallasTemperature sensors(&oneWire); //how it works here? //remember, it's "Ardu
         union sensor_address ID;
         uint8_t sensor_physical_order_no;  
         uint8_t assigned_discovery_number;
+        //offset calibration
         };
 
 int sensors_count;
@@ -60,32 +61,9 @@ Serial.print(sensors_count);
         sensors.getAddress(tempDS18B20_address.sensor_address_byte_table, i); //table / sensor number
 
         for (int j=0; j<DS18B20_COUNT; j++) {
-          if(DS18B20_table[j].ID.sensor_address_u64 == tempDS18B20_address.sensor_address_u64) 
-          {
-            DS18B20_table[j].assigned_discovery_number = i; //assign discovery number 
-         // else {
-            Serial.print("nie pykło");
-                Serial.println(" ");
-                Serial.println("adres właśnie odczytany");
-                Serial.println(" ");
-                for(int z = 0; z<8; z++) {
-                  
-                  Serial.print("0x");
-                  Serial.print(tempDS18B20_address.sensor_address_byte_table[z], HEX);
-                }
-                Serial.println(" ");
-                
-                Serial.println("adres z tablicy");
-
-                for(int z = 0; z<8; z++) {                
-                  
-                  Serial.print("0x");
-                  Serial.print(DS18B20_table[j].ID.sensor_address_byte_table[z], HEX);
-                  Serial.print(" ");
-
-                }
-              Serial.println(" ");
-            }
+          if(DS18B20_table[j].ID.sensor_address_u64 == tempDS18B20_address.sensor_address_u64) DS18B20_table[j].assigned_discovery_number = i;
+          //some cheking in later
+      
         }
   }
 
@@ -110,23 +88,23 @@ void loop(void)
   
   sensors.requestTemperatures(); // Send the command to get temperatures
   Serial.println("");
+
 for (int i =0; i < sensors.getDS18Count(); i++){
-  Serial.print("Temp_");
-  Serial.print(i);
-  Serial.print(" ");
+  //Serial.print("Temp_");
+  //Serial.print(i);
+  
   Serial.print(sensors.getTempCByIndex(DS18B20_table[i].assigned_discovery_number)); // Why "byIndex"? 
-  Serial.print(", ");
-  //sensors.getAddress(DS18B20_address, i);
- // Serial.print("adress: ");
-/*
-  for(int z = 0; z<8; z++) {Serial.print("0x");
-  Serial.print(DS18B20_address[z], HEX);
-  Serial.print(" ");
+  Serial.print("\t");
+
   }
-  */
-  }
+  Serial.println("");
     // You can have more than one IC on the same bus. 
     // 0 refers to the first IC on the wire
     delay(1000);
+    //test for raw values 
+    Serial.print(sensors.getTemp(DS18B20_table[8].ID.sensor_address_byte_table)/128); //9bit res, 1/128 temp value
+    Serial.print(".");
+    Serial.print(sensors.getTemp(DS18B20_table[8].ID.sensor_address_byte_table)%128);
+
 }
 
