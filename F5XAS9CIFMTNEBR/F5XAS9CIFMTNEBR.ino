@@ -1,5 +1,9 @@
+#include <Adafruit_NeoPixel.h>
+
 #include <OneWire.h>
 #include <DallasTemperature.h>
+
+
  
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
@@ -29,6 +33,7 @@ DallasTemperature sensors(&oneWire); //how it works here? //remember, it's "Ardu
 
 int sensors_count;
 used_temperature_sensor DS18B20_table[DS18B20_COUNT];
+float temperature_table[DS18B20_COUNT]; //general table for storing read temperatures
  
  
 void setup(void)
@@ -37,7 +42,7 @@ void setup(void)
   
 //used sensor adressess
   DS18B20_table[0] = {{0x28, 0x96, 0x00, 0x00, 0x9A, 0x5C, 0x00, 0x65}, 0, 0xFF, 184}; //why extended init did not work? maybe only during init and def?//C allows nesting, c++ not, that's why
-  DS18B20_table[1] = {{0x28, 0xC8, 0x00, 0x00, 0x11, 0x63, 0x00, 0xCE}, 1, 0xFF, 144};
+  DS18B20_table[1] = {{0x28, 0xC8, 0x00, 0x00, 0x11, 0x63, 0x00, 0xCE}, 1, 0xFF, 144}; 
   DS18B20_table[2] = {{0x28, 0x96, 0x00, 0x00, 0x99, 0x46, 0x00, 0x8A}, 2, 0xFF}, 16;
   DS18B20_table[3] = {{0x28, 0x96, 0x00, 0x00, 0xB2, 0x4A, 0x00, 0x92}, 3, 0xFF, 88};
   DS18B20_table[4] = {{0x28, 0xAF, 0x00, 0x00, 0xD8, 0x10, 0x01, 0xE8}, 4, 0xFF, -16};
@@ -72,36 +77,29 @@ Serial.print(sensors_count);
  
 void loop(void)
 {
-  // call sensors.requestTemperatures() to issue a global temperature
-  // request to all devices on the bus
-//  uint8_t DS18B20_address[8]; //adress is 8-byte long for each sensor
-
-  //read available sensors
-
- // for (int i =0; i < sensors_count; i++){
-
- //sensors.getAddress(DS18B20_address, i); //table / sensor number
-
-
- // }
-  
   
   sensors.requestTemperatures(); // Send the command to get temperatures
   Serial.println("");
 
-for (int i =0; i <DS18B20_COUNT ; i++){
+for (int i =0; i <DS18B20_COUNT; i++){
   
   //Serial.print(sensors.getTempCByIndex(DS18B20_table[i].assigned_discovery_number)); // Why "byIndex"? 
   //Serial.print("\t");
+
+ 
 Serial.print(sensors.getTemp(DS18B20_table[i].ID.sensor_address_byte_table));
+
+temperature_table[i] = (float) (sensors.getTemp(DS18B20_table[i].ID.sensor_address_byte_table)+DS18B20_table[i].offset_calibration)/128.f; // read temperature, scale and adjust offset
+
 Serial.print(" ");
 
-  Serial.print((float) (sensors.getTemp(DS18B20_table[i].ID.sensor_address_byte_table)+DS18B20_table[i].offset_calibration)/128.f); //9bit res, 1/128 temp value
+  Serial.print(temperature_table[i]); //9bit res, 1/128 temp value
   //Serial.print(".");
   //Serial.print((sensors.getTemp(DS18B20_table[i].ID.sensor_address_byte_table)%128)/128);//get some value after colon, make this binary shift later
   Serial.print(";");
 
   }
+
   Serial.println("");
     // You can have more than one IC on the same bus. 
     // 0 refers to the first IC on the wire
